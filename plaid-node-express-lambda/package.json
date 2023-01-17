@@ -1,0 +1,24 @@
+{
+    "name": "plaid-node-express-lambda",
+    "version": "1.0.0",
+    "description": "Personal finance tracking app with node backend",
+    "main": "hanlder.js",
+    "scripts": {
+        "start": "nodemon handler.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Sang June Rhee",
+    "license": "ISC",
+    "dependencies": {
+        "body-parser": "^1.20.1",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "express": "^4.17.1",
+        "plaid": "^12.2.0",
+        "serverless-http": "^2.7.0",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "serverless-offline": "^12.0.4"
+    }
+}

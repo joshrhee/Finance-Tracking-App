@@ -1,0 +1,33 @@
+service: plaid-go-lambda
+frameworkVersion: ">=1.28.0"
+
+provider:
+    name: aws
+    runtime: go1.x
+    region: us-east-1
+    stage: dev # This part will get stage variable from Makefile
+
+functions:
+    api:
+        # Type: AWS::Serverless::Api
+        # Properties:
+        #     Cors:
+        #         AllowOrigin: "'*'"
+        #         AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+        #         AllowHeaders: "'X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Requested-With,X-Auth-Token,Referer,User-Agent,Origin,Content-Type,Authorization,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
+        handler: bin/main
+        events:
+            - httpApi:
+                  path: /
+                  method: get
+            - httpApi:
+                  path: /create_link_token
+                  method: post
+            - httpApi:
+                  path: /get_access_token
+                  method: post
+
+package:
+    patterns:
+        - "!*/**" # ! menas excluding. exclude everyting and push bin/main file to aws
+        - bin/main
