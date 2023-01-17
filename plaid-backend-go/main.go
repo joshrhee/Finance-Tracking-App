@@ -25,6 +25,9 @@ var (
 	PLAID_REDIRECT_URI                   = ""
 	APP_PORT                             = ""
 	client              *plaid.APIClient = nil
+
+	FirstDayOfPreviousMonth = ""
+	LastDayOfPreviousMonth = ""
 )
 
 var environments = map[string]plaid.Environment{
@@ -79,6 +82,8 @@ func init() {
 	configuration.AddDefaultHeader("PLAID-SECRET", PLAID_SECRET)
 	configuration.UseEnvironment(environments[PLAID_ENV])
 	client = plaid.NewAPIClient(configuration)
+
+	getTransactionDateRange()
 }
 
 func main() {
@@ -117,7 +122,9 @@ func createLinkToken(c *gin.Context) {
 		return
 	}
 	fmt.Println("Link token is: ", linkToken)
-	c.JSON(http.StatusOK, linkToken)
+	c.JSON(200, gin.H{
+		"link_token": linkToken,
+	})
 }
 
 func renderError(c *gin.Context, originalErr error) {
@@ -199,8 +206,20 @@ type transaction struct {
 	Name string `json:"name"`
 }
 
-func getAccessToken(c *gin.Context) {
+func getTransactionDateRange() {
+	now := time.Now()
 
+	year, month, _ := now.Date()
+
+	FirstDayOfPreviousMonth = ((time.Date(year, month - 1, 1, 0, 0, 0, 0, now.Location())).String())[0:10]
+	LastDayOfPreviousMonth = (time.Date(year, month, 0, 0, 0, 0, 0, now.Location())).String()[0:10]
+
+	fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
+	fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
+	
+}
+
+func getAccessToken(c *gin.Context) {
 	encodedRequestBody, _ := ioutil.ReadAll(c.Request.Body)
 	stringPublicTokenObject := string(encodedRequestBody)
 	// fmt.Println("stringPublicTokenObject: ", stringPublicTokenObject)
@@ -259,8 +278,8 @@ func getAccessToken(c *gin.Context) {
 
 	transactionRequest := plaid.NewTransactionsGetRequest(
 		accessToken,
-		"2021-01-01",
-		"2021-02-10",
+		FirstDayOfPreviousMonth,
+		LastDayOfPreviousMonth,
 	)
 
 	options := plaid.TransactionsGetRequestOptions{

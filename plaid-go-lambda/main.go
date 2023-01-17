@@ -13,7 +13,6 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	plaid "github.com/plaid/plaid-go/v3/plaid"
@@ -28,6 +27,9 @@ var (
 	PLAID_REDIRECT_URI                   = ""
 	APP_PORT                             = ""
 	client              *plaid.APIClient = nil
+
+	FirstDayOfPreviousMonth = ""
+	LastDayOfPreviousMonth = ""
 )
 
 var environments = map[string]plaid.Environment{
@@ -85,7 +87,7 @@ func init() {
 	configuration.UseEnvironment(environments[PLAID_ENV])
 	client = plaid.NewAPIClient(configuration)
 
-	
+	getTransactionDateRange()
 }
 
 // We store the access_token in memory - in production, store it in a secure
@@ -191,6 +193,19 @@ type transaction struct {
 	Name string `json:"name"`
 }
 
+func getTransactionDateRange() {
+	now := time.Now()
+
+	year, month, _ := now.Date()
+
+	FirstDayOfPreviousMonth = ((time.Date(year, month - 1, 1, 0, 0, 0, 0, now.Location())).String())[0:10]
+	LastDayOfPreviousMonth = (time.Date(year, month, 0, 0, 0, 0, 0, now.Location())).String()[0:10]
+
+	fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
+	fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
+	
+}
+
 func getAccessToken(c *gin.Context) {
 
 	encodedRequestBody, _ := ioutil.ReadAll(c.Request.Body)
@@ -249,10 +264,13 @@ func getAccessToken(c *gin.Context) {
 	// 	"item_id":      itemID,
 	// })
 
+	fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
+	fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
+
 	transactionRequest := plaid.NewTransactionsGetRequest(
 		accessToken,
-		"2021-01-01",
-		"2021-02-10",
+		FirstDayOfPreviousMonth,
+		LastDayOfPreviousMonth,
 	)
 
 	options := plaid.TransactionsGetRequestOptions{
@@ -357,17 +375,17 @@ func main() {
 	// config.AllowOrigins = []string{"http://localhost:3000", "https://3wtjz9tgoc.execute-api.us-east-1.amazonaws.com"}
 	// r.Use(cors.New(config))
 
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"*"},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Content-Type","X-Amz-Date,Authorization","X-Api-Key","X-Amz-Security-Token"},
-		ExposeHeaders:    []string{"Content-Length"},
-		// AllowCredentials: true,
-		// AllowOriginFunc: func(origin string) bool {
-		//   return origin == "https://http://localhost:3000/"
-		// },
-		// MaxAge: 12 * time.Hour,
-	  }))
+	// router.Use(cors.New(cors.Config{
+	// 	AllowOrigins:     []string{"*"},
+	// 	AllowMethods:     []string{"GET", "POST"},
+	// 	AllowHeaders:     []string{"Content-Type","X-Amz-Date,Authorization","X-Api-Key","X-Amz-Security-Token"},
+	// 	ExposeHeaders:    []string{"Content-Length"},
+	// 	// AllowCredentials: true,
+	// 	// AllowOriginFunc: func(origin string) bool {
+	// 	//   return origin == "https://http://localhost:3000/"
+	// 	// },
+	// 	// MaxAge: 12 * time.Hour,
+	//   }))
 
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
@@ -377,12 +395,11 @@ func main() {
 	router.POST("/create_link_token", createLinkToken)
 	router.POST("/get_access_token", getAccessToken)
 
-	env := os.Getenv("GIN_MODE")
-	fmt.Println("env: ", env)
-	if env == "release" {
-		ginLambda = ginadapter.NewV2(router)
-		lambda.Start(Handler)
-	} else {
-		router.Run(":8080")
-	}
+	// env := os.Getenv("GIN_MODE")
+	// fmt.Println("env: ", env)
+	
+	ginLambda = ginadapter.NewV2(router)
+	lambda.Start(Handler)
+	
+	
 }

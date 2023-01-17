@@ -7,12 +7,12 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 
 // Golang api
-// const CREATE_LINK_TOKEN_URL =
-//     "https://3wtjz9tgoc.execute-api.us-east-1.amazonaws.com/create_link_token";
+const CREATE_LINK_TOKEN_URL =
+    "https://ftirs67nxk.execute-api.us-east-1.amazonaws.com/create_link_token";
 
 // Node.js api
-const CREATE_LINK_TOKEN_URL =
-    "https://d9mv9iihrd.execute-api.us-east-1.amazonaws.com/create_link_token";
+// const CREATE_LINK_TOKEN_URL =
+//     "https://d9mv9iihrd.execute-api.us-east-1.amazonaws.com/create_link_token";
 
 // Local
 // const CREATE_LINK_TOKEN_URL = "http://localhost:8080/create_link_token";
