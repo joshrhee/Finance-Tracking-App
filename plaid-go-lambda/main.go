@@ -38,6 +38,18 @@ var environments = map[string]plaid.Environment{
 	"production":  plaid.Production,
 }
 
+// We store the access_token in memory - in production, store it in a secure
+// persistent data store.
+var accessToken string
+var itemID string
+
+var paymentID string
+
+// The transfer_id is only relevant for the Transfer ACH product.
+// We store the transfer_id in memory - in production, store it in a secure
+// persistent data store
+var transferID string
+
 var ginLambda *ginadapter.GinLambdaV2
 
 func init() {
@@ -47,8 +59,11 @@ func init() {
 	}
 
 	// set constants from env
-	PLAID_CLIENT_ID = os.Getenv("PLAID_CLIENT_ID")
-	PLAID_SECRET = os.Getenv("PLAID_SECRET")
+	// PLAID_CLIENT_ID = os.Getenv("PLAID_CLIENT_ID")
+	// PLAID_SECRET = os.Getenv("PLAID_SECRET")
+
+	PLAID_CLIENT_ID = "63bbbc6ac82c770014eba811"
+	PLAID_SECRET = "cb056de5f8e820acc6e454fe883879"
 
 	if PLAID_CLIENT_ID == "" || PLAID_SECRET == "" {
 		log.Fatal("Error: PLAID_SECRET or PLAID_CLIENT_ID is not set. Did you copy .env.example to .env and fill it out?")
@@ -89,18 +104,6 @@ func init() {
 
 	getTransactionDateRange()
 }
-
-// We store the access_token in memory - in production, store it in a secure
-// persistent data store.
-var accessToken string
-var itemID string
-
-var paymentID string
-
-// The transfer_id is only relevant for the Transfer ACH product.
-// We store the transfer_id in memory - in production, store it in a secure
-// persistent data store
-var transferID string
 
 func createLinkToken(c *gin.Context) {
 	linkToken, err := linkTokenCreate(nil)

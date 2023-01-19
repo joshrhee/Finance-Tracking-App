@@ -5,6 +5,7 @@
     "main": "hanlder.js",
     "scripts": {
         "start": "nodemon handler.js",
+        "dev": "sls offline -s dev",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "Sang June Rhee",

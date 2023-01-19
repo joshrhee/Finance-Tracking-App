@@ -5,7 +5,7 @@ provider:
     name: aws
     runtime: go1.x
     region: us-east-1
-    stage: dev # This part will get stage variable from Makefile
+    stage: dev # 배포할거면 dev, local에서 테스트할거면 local
 
 functions:
     api:
@@ -15,7 +15,7 @@ functions:
         #         AllowOrigin: "'*'"
         #         AllowMethods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
         #         AllowHeaders: "'X-Amz-Date,X-Api-Key,X-Amz-Security-Token,X-Requested-With,X-Auth-Token,Referer,User-Agent,Origin,Content-Type,Authorization,Accept,Access-Control-Allow-Methods,Access-Control-Allow-Origin,Access-Control-Allow-Headers'"
-        handler: bin/main
+        handler: bin/main # 배포할때는 bin/main, local에서는 main.go
         events:
             - httpApi:
                   path: /
@@ -31,3 +31,10 @@ package:
     patterns:
         - "!*/**" # ! menas excluding. exclude everyting and push bin/main file to aws
         - bin/main
+
+plugins:
+    - serverless-offline
+
+custom:
+    serverless-offline:
+        noPrependStageInUrl: true
