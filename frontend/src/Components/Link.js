@@ -12,6 +12,10 @@ const GET_ACCESS_TOKEN_URL =
 // const GET_ACCESS_TOKEN_URL =
 //     "https://d9mv9iihrd.execute-api.us-east-1.amazonaws.com/get_access_token";
 
+// Typescript api
+// const GET_ACCESS_TOKEN_URL =
+//     "https://12i7pxo3s5.execute-api.us-east-1.amazonaws.com/dev/plaid-node-lambda/get_access_token";
+
 // Local
 // const GET_ACCESS_TOKEN_URL = "http://localhost:8080/get_access_token";
 

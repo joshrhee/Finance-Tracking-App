@@ -26,6 +26,17 @@ functions:
             - httpApi:
                   path: /get_access_token
                   method: post
+        # environment:
+        #     PLATY_ID_TOKEN_TABLE: !Ref PlaidIdTokenTable
+
+    # sendToQueue:
+    #     handler: bin/sendToQueue
+    #     environment:
+    #         QUEUE_URL: !GetAtt Plaid-SQS.Arn
+    #     events:
+    #         - httpApi:
+    #               path: /send-to-queue
+    #               method: post
 
 package:
     patterns:
@@ -38,3 +49,22 @@ plugins:
 custom:
     serverless-offline:
         noPrependStageInUrl: true
+# resources:
+#     Resources:
+#         Plaid-SQS:
+#             Type: AWS::SQS::Queue
+#             Properties:
+#                 QueueName: Plaid-SQS
+#         PlaidIdTokenTable:
+#             Type: AWS::DynamoDB::Table
+#             Properties:
+#                 TableName: PlaidIdTokenTable
+#                 AttributeDefinitions:
+#                     - AttributeName: id
+#                       AttributeType: S
+#                 KeySchema:
+#                     - AttributeName: id
+#                       KeyType: HASH
+#                 ProvisionedThroughput:
+#                     ReadCapacityUnits: 5
+#                     WriteCapacityUnits: 5

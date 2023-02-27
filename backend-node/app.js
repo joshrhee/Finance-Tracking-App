@@ -2,6 +2,8 @@
 // public token: https://{{env_url}}/sandbox/public_token/create
 // access token: https://{{env_url}}/item/public_token/exchange
 // Balance: https://{{env_url}}/accounts/balance/get
+
+import { DynamoDB, DocumentClient } from "aws-sdk";
 const { v4 } = require("uuid");
 
 const {
@@ -92,6 +94,28 @@ const institutionIDs = {
 let institutions = [];
 
 const client = new PlaidApi(configuration);
+
+const ddb = new DynamoDB({
+    endpoint: "http://localhost:8000",
+});
+
+let i = 0;
+const params = {
+    Insertion: "Succeed!" + i,
+};
+
+function insetHelloToDB() {
+    ddb.putItem(params, function (err, data) {
+        if (err) {
+            console.log("DB Insert Error!!!!");
+            console.log("err: ", err.message);
+        } else {
+            console.log("DB Insertion is succeed!!");
+            console.log("Data: ", data);
+            i += 1;
+        }
+    });
+}
 
 function getTransactionDateRange() {
     const date = new Date();

@@ -1,16 +1,19 @@
+const client = require("./plaid");
+
 const serverless = require("serverless-http");
 const express = require("express");
 const cors = require("cors");
 const app = express();
 app.use(cors());
 
-const {
-    Configuration,
-    PlaidApi,
-    Products,
-    PlaidEnvironments,
-    transac,
-} = require("plaid");
+// const {
+//     Configuration,
+//     PlaidApi,
+//     Products,
+//     PlaidEnvironments,
+//     transac,
+// } = require("plaid");
+
 const dotenv = require("dotenv");
 dotenv.config();
 const bodyParser = require("body-parser");
@@ -19,10 +22,10 @@ const { v4: uuidv4 } = require("uuid");
 const CLIENT_USER_ID = uuidv4();
 
 const port = process.env.APP_PORT || 8080;
-const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
-const PLAID_SECRET = process.env.PLAID_SECRET;
-const PLAID_ENV = process.env.PLAID_ENV;
-const PLAID_PRODUCTS = ["auth", "transactions", "identity"];
+// const PLAID_CLIENT_ID = process.env.PLAID_CLIENT_ID;
+// const PLAID_SECRET = process.env.PLAID_SECRET;
+// const PLAID_ENV = process.env.PLAID_ENV;
+const PLAID_PRODUCTS = ["auth", "transactions"];
 const PLAID_COUNTRY_CODES = ["US", "CA"];
 
 const PLAID_ANDROID_PACKAGE_NAME = "";
@@ -47,17 +50,17 @@ let TRANSFER_ID = null;
 
 let LINK_TOKEN = null;
 
-const configuration = new Configuration({
-    basePath: PlaidEnvironments[PLAID_ENV],
-    baseOptions: {
-        headers: {
-            "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
-            "PLAID-SECRET": PLAID_SECRET,
-            "Plaid-Version": "2020-09-14",
-        },
-    },
-});
-const client = new PlaidApi(configuration);
+// const configuration = new Configuration({
+//     basePath: PlaidEnvironments[PLAID_ENV],
+//     baseOptions: {
+//         headers: {
+//             "PLAID-CLIENT-ID": PLAID_CLIENT_ID,
+//             "PLAID-SECRET": PLAID_SECRET,
+//             "Plaid-Version": "2020-09-14",
+//         },
+//     },
+// });
+// const client = new PlaidApi(configuration);
 
 function getTransactionDateRange() {
     const date = new Date();
@@ -104,12 +107,15 @@ app.post("/create_link_token", (request, response, next) => {
             if (PLAID_ANDROID_PACKAGE_NAME !== "") {
                 configs.android_package_name = PLAID_ANDROID_PACKAGE_NAME;
             }
+
+            console.log("Inside of Linktoken, plaid client: ", client);
+
             const createTokenResponse = await client.linkTokenCreate(configs);
             // prettyPrintResponse(createTokenResponse);
-            console.log(
-                "after create link token, createTokenResponse.data: ",
-                createTokenResponse.data
-            );
+            // console.log(
+            //     "after create link token, createTokenResponse.data: ",
+            //     createTokenResponse.data
+            // );
             // LINK_TOKEN = createTokenResponse.data.link_token;
             return response.status(200).json(createTokenResponse.data);
         })

@@ -14,6 +14,10 @@ const CREATE_LINK_TOKEN_URL =
 // const CREATE_LINK_TOKEN_URL =
 //     "https://d9mv9iihrd.execute-api.us-east-1.amazonaws.com/create_link_token";
 
+// Typescript api
+// const CREATE_LINK_TOKEN_URL =
+//     "https://12i7pxo3s5.execute-api.us-east-1.amazonaws.com/dev/plaid-node-lambda/create_link_token";
+
 // Local
 // const CREATE_LINK_TOKEN_URL = "http://localhost:8080/create_link_token";
 
