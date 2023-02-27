@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joshrhee/plaid-go-lambda/GetTransactions"
 
 	"github.com/plaid/plaid-go/v3/plaid"
 	"io/ioutil"
@@ -20,13 +21,6 @@ var (
 	FirstDayOfPreviousMonth                  = ""
 	LastDayOfPreviousMonth                   = ""
 )
-
-type transaction struct {
-	Date     string   `json:"date"`
-	Amount   float64  `json:"amount"`
-	Category []string `json:"category"`
-	Name     string   `json:"name"`
-}
 
 func RenderError(c *gin.Context, originalErr error) {
 	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
@@ -52,7 +46,6 @@ func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessTok
 
 	encodedRequestBody, _ := ioutil.ReadAll(c.Request.Body)
 	stringPublicTokenObject := string(encodedRequestBody)
-	// fmt.Println("stringPublicTokenObject: ", stringPublicTokenObject)
 
 	splitedString := strings.Split(stringPublicTokenObject, "")
 
@@ -102,51 +95,7 @@ func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessTok
 	}
 
 	// Getting Transaction
-	transactionRequest := plaid.NewTransactionsGetRequest(
-		*accessToken,
-		FirstDayOfPreviousMonth,
-		LastDayOfPreviousMonth,
-	)
-
-	fmt.Println("accessToken: ", *accessToken)
-	fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
-	fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
-
-	fmt.Println("TransactionRequest: ", *transactionRequest)
-
-	options := plaid.TransactionsGetRequestOptions{
-		Count:  plaid.PtrInt32(100),
-		Offset: plaid.PtrInt32(0),
-	}
-
-	transactionRequest.SetOptions(options)
-
-	fmt.Println("After SetOptions, TransactionRequest: ", *transactionRequest)
-
-	transactionResponse, _, err := client.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*transactionRequest).Execute()
-	if err != nil {
-		fmt.Errorf("Transaction get error: ", err)
-	}
-
-	fmt.Println("transactionResponse: ", transactionResponse)
-
-	var editedTransactions []transaction
-	transactions := transactionResponse.GetTransactions()
-
-	fmt.Println("transactions: ", transactions)
-	fmt.Println("transactionResponse.TotalTransactions: ", transactionResponse.TotalTransactions)
-
-	for i := 0; i < int(transactionResponse.TotalTransactions); i++ {
-		editedTransaction := transaction{
-			Date:     transactions[i].Date,
-			Amount:   transactions[i].Amount,
-			Category: transactions[i].Category,
-			Name:     transactions[i].Name,
-		}
-		editedTransactions = append(editedTransactions, editedTransaction)
-	}
-
-	fmt.Println("editedTransactions: ", editedTransactions)
+	editedTransactions := GetTransactions.GetTransactions(accessToken, client, FirstDayOfPreviousMonth, LastDayOfPreviousMonth, ctx)
 	c.JSON(http.StatusOK, editedTransactions)
 }
 
