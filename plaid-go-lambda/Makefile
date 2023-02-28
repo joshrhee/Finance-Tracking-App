@@ -8,8 +8,7 @@ clean:
 # 	sls offline
 
 offline: clean build
-	sls offline
+	sls offline --useDocker start --host 0.0.0.0
 
-# --useDocker start --host 0.0.0.0
 deploy_dev: clean build   # this means run build command first before deploy_prod
 	serverless deploy

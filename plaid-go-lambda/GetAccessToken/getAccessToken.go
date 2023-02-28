@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/joshrhee/plaid-go-lambda/DynamoDB"
 	"github.com/joshrhee/plaid-go-lambda/GetTransactions"
-
 	"github.com/plaid/plaid-go/v3/plaid"
 	"io/ioutil"
 	"net/http"
@@ -22,18 +22,8 @@ var (
 	LastDayOfPreviousMonth                   = ""
 )
 
-func RenderError(c *gin.Context, originalErr error) {
-	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
-		// Return 200 and allow the front end to render the error.
-		c.JSON(http.StatusOK, gin.H{"error": plaidError})
-		return
-	}
-
-	c.JSON(http.StatusInternalServerError, gin.H{"error": originalErr.Error()})
-}
-
 // Getting Access token
-func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessToken *string, plaidItemID *string, plaidTransferID *string, plaidProducts string, firstDayOfPreviousMonth string, lastDayOfPreviousMonth string) {
+func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessToken *string, clientUserId string, plaidItemID *string, plaidTransferID *string, plaidProducts string, firstDayOfPreviousMonth string, lastDayOfPreviousMonth string) {
 
 	client = plaidClient
 	accessToken = plaidAccessToken
@@ -87,7 +77,7 @@ func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessTok
 	*accessToken = exchangePublicTokenResp.GetAccessToken()
 
 	// Add DynamoDB for {clientUserID: accessToken}
-	//putDynamoDB(clientUserId)
+	DynamoDB.PutDynamoDB(clientUserId, *accessToken)
 
 	*itemID = exchangePublicTokenResp.GetItemId()
 	if itemExists(strings.Split(PLAID_PRODUCTS, ","), "transfer") {
@@ -97,6 +87,16 @@ func GetAccessToken(c *gin.Context, plaidClient *plaid.APIClient, plaidAccessTok
 	// Getting Transaction
 	editedTransactions := GetTransactions.GetTransactions(accessToken, client, FirstDayOfPreviousMonth, LastDayOfPreviousMonth, ctx)
 	c.JSON(http.StatusOK, editedTransactions)
+}
+
+func RenderError(c *gin.Context, originalErr error) {
+	if plaidError, err := plaid.ToPlaidError(originalErr); err == nil {
+		// Return 200 and allow the front end to render the error.
+		c.JSON(http.StatusOK, gin.H{"error": plaidError})
+		return
+	}
+
+	c.JSON(http.StatusInternalServerError, gin.H{"error": originalErr.Error()})
 }
 
 // Helper function to determine if Transfer is in Plaid product array

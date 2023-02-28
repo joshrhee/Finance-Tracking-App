@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/joshrhee/plaid-go-lambda/CreateLinkToken"
+	"github.com/joshrhee/plaid-go-lambda/DynamoDB"
 	"github.com/joshrhee/plaid-go-lambda/GetAccessToken"
 	"log"
 	"os"
@@ -12,10 +13,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
-	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,7 +29,7 @@ var (
 	PLAID_REDIRECT_URI                   = ""
 	APP_PORT                             = ""
 	client              *plaid.APIClient = nil
-	clientUserId                         = ""
+	clientUserId                         = time.Now().String()
 
 	once     sync.Once
 	db       *dynamodb.Client
@@ -185,36 +183,13 @@ func init() {
 
 // Creating Link Token
 func createLinkToken(c *gin.Context) {
-	CreateLinkToken.CreateLinkToken(c, client, PLAID_COUNTRY_CODES, PLAID_REDIRECT_URI, PLAID_PRODUCTS)
+	CreateLinkToken.CreateLinkToken(c, client, PLAID_COUNTRY_CODES, PLAID_REDIRECT_URI, PLAID_PRODUCTS, clientUserId)
 }
 
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
 func getAccessToken(c *gin.Context) {
-	GetAccessToken.GetAccessToken(c, client, &accessToken, &itemID, &transferID, PLAID_PRODUCTS, FirstDayOfPreviousMonth, LastDayOfPreviousMonth)
+	GetAccessToken.GetAccessToken(c, client, &accessToken, clientUserId, &itemID, &transferID, PLAID_PRODUCTS, FirstDayOfPreviousMonth, LastDayOfPreviousMonth)
 }
 
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-// ########################################################################################
-
-//	type transaction struct {
-//		Date     string   `json:"date"`
-//		Amount   float64  `json:"amount"`
-//		Category []string `json:"category"`
-//		Name     string   `json:"name"`
-//	}
 func getTransactionDateRange() {
 	now := time.Now()
 
@@ -224,85 +199,29 @@ func getTransactionDateRange() {
 	LastDayOfPreviousMonth = (time.Date(year, month, 0, 0, 0, 0, 0, now.Location())).String()[0:10]
 }
 
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-//  ########################################################################################
-
-// func SendMessageToSQS(queueUrl string, messages []string) error {
-//     // Load the AWS SDK configuration
-//     cfg, err := config.LoadDefaultAWSConfig()
-//     if err != nil {
-//         return err
-//     }
-
-//     // Create a new SQS client
-//     svc := sqs.New(cfg)
-
-//     // Loop over the array of messages and send each message to the SQS queue
-//     for _, message := range messages {
-//         input := &sqs.SendMessageInput{
-//             MessageBody: aws.String(message),
-//             QueueUrl:    aws.String(queueUrl),
-//         }
-
-//         _, err := svc.SendMessage(input)
-//         if err != nil {
-//             return err
-//         }
-//     }
-
-//     return nil
-// }
-
 // Get DynamoDB
 func GetDynamoDB() *dynamodb.Client {
-	fmt.Println("GetDynamoDB is called!!!!")
-	once.Do(func() {
-		cfg, err := config.LoadDefaultConfig(context.Background())
-		if err != nil {
-			panic(err)
-		}
-
-		db = dynamodb.NewFromConfig(cfg)
-	})
-
-	return db
+	return DynamoDB.GetDynamoDB()
 }
 
-// Write to DynamoDB
-func putDynamoDB(clientUserId string) {
-	fmt.Println("PutDynamoDB is called!!!!")
-	// Define the DynamoDB item to be put
-	item := map[string]types.AttributeValue{
-		"clientUserID": &types.AttributeValueMemberS{Value: clientUserId},
-		"accessToken":  &types.AttributeValueMemberS{Value: accessToken},
-	}
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
+//  ########################################################################################
 
-	// Create the input object for the PutItem API call
-	input := &dynamodb.PutItemInput{
-		Item:      item,
-		TableName: aws.String("PlaidIdTokenTable"),
-	}
-
-	// Call the PutItem API
-	_, err := db.PutItem(context.Background(), input)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("PutItem successful for clientUserID %s\n", clientUserId)
-}
+//func SendMessageToSQS(queueUrl string, messages []string) error {
+//	SQS.SendMessageToSQS()
+//}
 
 func Handler(ctx context.Context, req events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPResponse, error) {
 	// If no name is provided in the HTTP request body, throw an error

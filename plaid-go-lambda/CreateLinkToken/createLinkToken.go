@@ -7,7 +7,6 @@ import (
 	"github.com/plaid/plaid-go/v3/plaid"
 	"net/http"
 	"strings"
-	"time"
 )
 
 var (
@@ -19,12 +18,13 @@ var (
 )
 
 // Creating Link Token
-func CreateLinkToken(c *gin.Context, plaidClient *plaid.APIClient, plaidCountryCode string, plaidPredictUri string, plaidProducts string) {
+func CreateLinkToken(c *gin.Context, plaidClient *plaid.APIClient, plaidCountryCode string, plaidPredictUri string, plaidProducts string, mainClientUserId string) {
 	// retreiveSecrets
 
 	fmt.Println("CreateLinkToken is started!!!!")
 
 	client = plaidClient
+	clientUserId = mainClientUserId
 
 	PLAID_COUNTRY_CODES = plaidCountryCode
 	PLAID_REDIRECT_URI = plaidPredictUri
@@ -53,7 +53,6 @@ func linkTokenCreate(paymentInitiation *plaid.LinkTokenCreateRequestPaymentIniti
 	// This should correspond to a unique id for the current user.
 	// Typically, this will be a user ID number from your application.
 	// Personally identifiable information, such as an email address or phone number, should not be used here.
-	clientUserId = time.Now().String()
 	user := plaid.LinkTokenCreateRequestUser{
 		ClientUserId: clientUserId,
 	}
