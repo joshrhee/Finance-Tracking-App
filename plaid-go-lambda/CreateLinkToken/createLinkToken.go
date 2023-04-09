@@ -3,10 +3,11 @@ package CreateLinkToken
 import (
 	"context"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/plaid/plaid-go/v3/plaid"
 	"net/http"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+	"github.com/plaid/plaid-go/v3/plaid"
 )
 
 var (
@@ -64,6 +65,8 @@ func linkTokenCreate(paymentInitiation *plaid.LinkTokenCreateRequestPaymentIniti
 		user,
 	)
 
+	fmt.Println("Request!!!!!!!!!: ", request)
+
 	if paymentInitiation != nil {
 		request.SetPaymentInitiation(*paymentInitiation)
 		// The 'payment_initiation' product has to be the only element in the 'products' list.
@@ -81,6 +84,8 @@ func linkTokenCreate(paymentInitiation *plaid.LinkTokenCreateRequestPaymentIniti
 	if err != nil {
 		return "", err
 	}
+
+	fmt.Println("linkTokenCreateResp!!!!!!!: ", linkTokenCreateResp)
 
 	return linkTokenCreateResp.GetLinkToken(), nil
 }

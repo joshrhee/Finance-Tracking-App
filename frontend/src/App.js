@@ -32,6 +32,7 @@ function App() {
     const CLIENT_USER_ID = uuidv4(); // 이 uuid는 나만씀, 결국 다른 사람들도 이거 쓰려면 로그인 정보가지고 uuid만들어야함!!!
 
     const createLinkToken = async () => {
+        console.log("Client user id: ", CLIENT_USER_ID);
         axios
             .post(CREATE_LINK_TOKEN_URL, { CLIENT_USER_ID })
             .then((res) => {

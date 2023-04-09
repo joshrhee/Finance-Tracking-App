@@ -1,0 +1,7 @@
+plaid:
+  client:
+    id: 63bbbc6ac82c770014eba811
+  secret: cb056de5f8e820acc6e454fe883879
+  public:
+    key: YOUR_PLAID_PUBLIC_KEY
+  environment: sandbox

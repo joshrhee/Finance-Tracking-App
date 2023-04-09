@@ -4,9 +4,14 @@ import { CSVLink } from "react-csv";
 
 import axios from "axios";
 
+import "../App.css";
+
 // Golang api
-const GET_ACCESS_TOKEN_URL =
-    "https://ftirs67nxk.execute-api.us-east-1.amazonaws.com/get_access_token";
+// const GET_ACCESS_TOKEN_URL =
+//     "https://ftirs67nxk.execute-api.us-east-1.amazonaws.com/get_access_token";
+
+// Java api
+const GET_ACCESS_TOKEN_URL = "http://localhost:8080/get_access_token";
 
 // Node.js api
 // const GET_ACCESS_TOKEN_URL =
