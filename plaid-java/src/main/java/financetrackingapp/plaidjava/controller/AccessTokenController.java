@@ -35,10 +35,6 @@ public class AccessTokenController {
                     .itemPublicTokenExchange(request)
                     .execute();
 
-            // // plaid 2.2.0 version
-//            Response<ItemPublicTokenExchangeResponse> response = this.plaidClient.service()
-//                    .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken))
-//                    .execute();
 
             this.authService.setAccessToken(response.body().getAccessToken());
             this.authService.setItemId(response.body().getItemId());

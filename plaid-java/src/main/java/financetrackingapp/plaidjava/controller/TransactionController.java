@@ -1,12 +1,9 @@
 package financetrackingapp.plaidjava.controller;
 
-//import com.plaid.client.PlaidClient;
 import com.plaid.client.model.Transaction;
 import com.plaid.client.model.TransactionsGetRequest;
 import com.plaid.client.model.TransactionsGetResponse;
 import com.plaid.client.request.PlaidApi;
-//import com.plaid.client.request.TransactionsGetRequest;
-//import com.plaid.client.response.TransactionsGetResponse;
 import financetrackingapp.plaidjava.domain.CustomTransaction;
 import financetrackingapp.plaidjava.services.PlaidAuthService;
 
@@ -45,12 +42,6 @@ public class TransactionController {
                     .startDate(startDate)
                     .endDate(endDate);
             Response<TransactionsGetResponse> response = plaidClient.transactionsGet(request).execute();
-
-//            Response<TransactionsGetResponse> response = this.plaidClient.service()
-//                    .transactionsGet(new TransactionsGetRequest(this.authService.getAccessToken(), startDate, endDate)
-//                            .withCount(250)
-//                            .withOffset(0))
-//                    .execute();
 
             List<Transaction> transactions = new ArrayList<>();
             transactions.addAll(response.body().getTransactions());
