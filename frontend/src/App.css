@@ -8,6 +8,7 @@
     color: #fff;
     font-family: "Helvetica Neue", sans-serif;
     height: 100vh;
+    text-align: center; /* Add this line */
 }
 
 /* Link.js */

@@ -1,64 +1,65 @@
-// package GetTransactions
+package GetTransactions
 
-// import (
-// 	"context"
-// 	"fmt"
-// 	"github.com/plaid/plaid-go/v3/plaid"
-// )
+import (
+	"context"
+	"fmt"
 
-// type transaction struct {
-// 	Date     string   `json:"date"`
-// 	Amount   float64  `json:"amount"`
-// 	Category []string `json:"category"`
-// 	Name     string   `json:"name"`
-// }
+	"github.com/plaid/plaid-go/v3/plaid"
+)
 
-// func GetTransactions(accessToken *string, client *plaid.APIClient, FirstDayOfPreviousMonth string, LastDayOfPreviousMonth string, ctx context.Context) []transaction {
-// 	// Getting Transaction
-// 	transactionRequest := plaid.NewTransactionsGetRequest(
-// 		*accessToken,
-// 		FirstDayOfPreviousMonth,
-// 		LastDayOfPreviousMonth,
-// 	)
+type Transaction struct {
+	Date     string   `json:"date"`
+	Amount   float64  `json:"amount"`
+	Category []string `json:"category"`
+	Name     string   `json:"name"`
+}
 
-// 	//fmt.Println("accessToken: ", *accessToken)
-// 	//fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
-// 	//fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
+func GetTransactions(accessToken *string, client *plaid.APIClient, FirstDayOfPreviousMonth string, LastDayOfPreviousMonth string, ctx context.Context) []Transaction {
+	// Getting Transaction
+	transactionRequest := plaid.NewTransactionsGetRequest(
+		*accessToken,
+		FirstDayOfPreviousMonth,
+		LastDayOfPreviousMonth,
+	)
 
-// 	//fmt.Println("TransactionRequest: ", *transactionRequest)
+	//fmt.Println("accessToken: ", *accessToken)
+	//fmt.Println("FirstDayOfPreviousMonth: ", FirstDayOfPreviousMonth)
+	//fmt.Println("LastDayOfPreviousMonth: ", LastDayOfPreviousMonth)
 
-// 	options := plaid.TransactionsGetRequestOptions{
-// 		Count:  plaid.PtrInt32(100),
-// 		Offset: plaid.PtrInt32(0),
-// 	}
+	//fmt.Println("TransactionRequest: ", *transactionRequest)
 
-// 	transactionRequest.SetOptions(options)
+	options := plaid.TransactionsGetRequestOptions{
+		Count:  plaid.PtrInt32(100),
+		Offset: plaid.PtrInt32(0),
+	}
 
-// 	//fmt.Println("After SetOptions, TransactionRequest: ", *transactionRequest)
+	transactionRequest.SetOptions(options)
 
-// 	transactionResponse, _, err := client.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*transactionRequest).Execute()
-// 	if err != nil {
-// 		fmt.Errorf("Transaction get error: ", err)
-// 	}
+	//fmt.Println("After SetOptions, TransactionRequest: ", *transactionRequest)
 
-// 	//fmt.Println("transactionResponse: ", transactionResponse)
+	transactionResponse, _, err := client.PlaidApi.TransactionsGet(ctx).TransactionsGetRequest(*transactionRequest).Execute()
+	if err != nil {
+		fmt.Errorf("Transaction get error: ", err)
+	}
 
-// 	var editedTransactions []transaction
-// 	transactions := transactionResponse.GetTransactions()
+	//fmt.Println("transactionResponse: ", transactionResponse)
 
-// 	//fmt.Println("transactions: ", transactions)
-// 	//fmt.Println("transactionResponse.TotalTransactions: ", transactionResponse.TotalTransactions)
+	var editedTransactions []Transaction
+	transactions := transactionResponse.GetTransactions()
 
-// 	for i := 0; i < int(transactionResponse.TotalTransactions); i++ {
-// 		editedTransaction := transaction{
-// 			Date:     transactions[i].Date,
-// 			Amount:   transactions[i].Amount,
-// 			Category: transactions[i].Category,
-// 			Name:     transactions[i].Name,
-// 		}
-// 		editedTransactions = append(editedTransactions, editedTransaction)
-// 	}
+	//fmt.Println("transactions: ", transactions)
+	//fmt.Println("transactionResponse.TotalTransactions: ", transactionResponse.TotalTransactions)
 
-// 	fmt.Println("editedTransactions: ", editedTransactions)
-// 	return editedTransactions
-// }
+	for i := 0; i < int(transactionResponse.TotalTransactions); i++ {
+		editedTransaction := Transaction{
+			Date:     transactions[i].Date,
+			Amount:   transactions[i].Amount,
+			Category: transactions[i].Category,
+			Name:     transactions[i].Name,
+		}
+		editedTransactions = append(editedTransactions, editedTransaction)
+	}
+
+	fmt.Println("editedTransactions: ", editedTransactions)
+	return editedTransactions
+}

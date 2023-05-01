@@ -1,11 +1,32 @@
 service: plaid-go-lambda
 frameworkVersion: ">=1.28.0"
 
+custom:
+    FirehoseDeliveryStreamName: plaid-go-lambda-firehose-delivery-stream
+    S3BucketName: plaid-go-lambda-s3-bucket
+    S3Prefix: plaid-go-lambda-s3-prefix
+    serverless-offline:
+        noPrependStageInUrl: true
+
 provider:
     name: aws
     runtime: go1.x
     region: us-east-1
     stage: dev # 배포할거면 dev, local에서 테스트할거면 local
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - firehose:PutRecord
+              - firehose:PutRecordBatch
+          Resource:
+              - !Sub "arn:aws:firehose:${AWS::Region}:${AWS::AccountId}:deliverystream/${self:custom.FirehoseDeliveryStreamName}"
+        - Effect: Allow
+          Action:
+              - s3:ListBucket
+              - s3:GetObject
+          Resource:
+              - !Sub "arn:aws:s3:::plaid-go-lambda-s3-bucket/*"
+              - !Sub "arn:aws:s3:::plaid-go-lambda-s3-bucket"
 
 functions:
     api:
@@ -46,11 +67,78 @@ package:
 plugins:
     - serverless-offline
 
-custom:
-    serverless-offline:
-        noPrependStageInUrl: true
-# resources:
-#     Resources:
+resources:
+    Resources:
+        FirehoseDeliveryStream:
+            Type: AWS::KinesisFirehose::DeliveryStream
+            Properties:
+                DeliveryStreamName: ${self:custom.FirehoseDeliveryStreamName}
+                ExtendedS3DestinationConfiguration:
+                    BucketARN:
+                        !Join ["", ["arn:aws:s3:::", !Ref TransactionsBucket]]
+                    Prefix: ${self:custom.S3Prefix}
+                    BufferingHints:
+                        IntervalInSeconds: 60
+                        SizeInMBs: 5
+                    CompressionFormat: UNCOMPRESSED
+                    RoleARN: !GetAtt FirehoseDeliveryRole.Arn
+                    CloudWatchLoggingOptions:
+                        Enabled: true
+                        LogGroupName: !Ref FirehoseLogGroup
+                        LogStreamName: !Ref FirehoseLogStream
+        FirehoseDeliveryRole:
+            Type: AWS::IAM::Role
+            Properties:
+                RoleName: FirehoseDeliveryRole
+                AssumeRolePolicyDocument:
+                    Version: "2012-10-17"
+                    Statement:
+                        - Effect: Allow
+                          Principal:
+                              Service: firehose.amazonaws.com
+                          Action: sts:AssumeRole
+                Policies:
+                    - PolicyName: FirehoseS3AccessPolicy
+                      PolicyDocument:
+                          Version: "2012-10-17"
+                          Statement:
+                              - Effect: Allow
+                                Action:
+                                    - s3:AbortMultipartUpload
+                                    - s3:GetBucketLocation
+                                    - s3:GetObject
+                                    - s3:ListBucket
+                                    - s3:ListBucketMultipartUploads
+                                    - s3:PutObject
+                                Resource:
+                                    - !Join [
+                                          "",
+                                          [
+                                              "arn:aws:s3:::",
+                                              !Ref TransactionsBucket,
+                                              "/*",
+                                          ],
+                                      ]
+                                    - !Join [
+                                          "",
+                                          [
+                                              "arn:aws:s3:::",
+                                              !Ref TransactionsBucket,
+                                          ],
+                                      ]
+        TransactionsBucket:
+            Type: AWS::S3::Bucket
+            Properties:
+                BucketName: ${self:custom.S3BucketName}
+        FirehoseLogGroup:
+            Type: AWS::Logs::LogGroup
+            Properties:
+                LogGroupName: /aws/kinesisfirehose/${self:custom.FirehoseDeliveryStreamName}
+        FirehoseLogStream:
+            Type: AWS::Logs::LogStream
+            Properties:
+                LogGroupName: !Ref FirehoseLogGroup
+                LogStreamName: s3Backup
 #         Plaid-SQS:
 #             Type: AWS::SQS::Queue
 #             Properties:

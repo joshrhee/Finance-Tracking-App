@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/joshrhee/plaid-go-lambda/CreateLinkToken"
 	"github.com/joshrhee/plaid-go-lambda/DynamoDB"
+	"github.com/joshrhee/plaid-go-lambda/GetAccessToken"
 
-	// "github.com/joshrhee/plaid-go-lambda/GetAccessToken"
 	"log"
 	"os"
 	"sync"
@@ -188,9 +188,9 @@ func createLinkToken(c *gin.Context) {
 	CreateLinkToken.CreateLinkToken(c, client, PLAID_COUNTRY_CODES, PLAID_REDIRECT_URI, PLAID_PRODUCTS, clientUserId)
 }
 
-// func getAccessToken(c *gin.Context) {
-// 	GetAccessToken.GetAccessToken(c, client, &accessToken, clientUserId, &itemID, &transferID, PLAID_PRODUCTS, FirstDayOfPreviousMonth, LastDayOfPreviousMonth)
-// }
+func getAccessToken(c *gin.Context) {
+	GetAccessToken.GetAccessToken(c, client, &accessToken, clientUserId, &itemID, &transferID, PLAID_PRODUCTS, FirstDayOfPreviousMonth, LastDayOfPreviousMonth)
+}
 
 func getTransactionDateRange() {
 	now := time.Now()
@@ -242,7 +242,7 @@ func main() {
 		})
 	})
 	router.POST("/create_link_token", createLinkToken)
-	// router.POST("/get_access_token", getAccessToken)
+	router.POST("/get_access_token", getAccessToken)
 
 	// env := os.Getenv("GIN_MODE")
 	// fmt.Println("env: ", env)

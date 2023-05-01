@@ -7,11 +7,11 @@ import axios from "axios";
 import "../App.css";
 
 // Golang api
-// const GET_ACCESS_TOKEN_URL =
-//     "https://ftirs67nxk.execute-api.us-east-1.amazonaws.com/get_access_token";
+const GET_ACCESS_TOKEN_URL =
+    "https://ftirs67nxk.execute-api.us-east-1.amazonaws.com/get_access_token";
 
-// Java api
-const GET_ACCESS_TOKEN_URL = "http://localhost:8080/get_access_token";
+// // Java api
+// const GET_ACCESS_TOKEN_URL = "http://localhost:8080/get_access_token";
 
 // Node.js api
 // const GET_ACCESS_TOKEN_URL =
@@ -117,13 +117,19 @@ function Link(props) {
     return (
         <div>
             <div>
+                <button type="button" onClick={() => props.createLinkToken()}>
+                    Click this button first (Create Link Token)
+                </button>
+            </div>
+
+            <div>
                 <button type="button" onClick={() => openHandler()}>
                     Get Transactions information
                 </button>
             </div>
 
             <div className="col-sm-8">
-                <CSVLink
+                {/* <CSVLink
                     data={transactions}
                     filename="가계부"
                     className="btn btn-success mb-3"
@@ -140,7 +146,7 @@ function Link(props) {
                     }}
                 >
                     Export Excel File
-                </button>
+                </button> */}
 
                 <table className="table table-bordered text-white">
                     <thead>

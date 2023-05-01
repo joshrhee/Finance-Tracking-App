@@ -75,11 +75,11 @@ function App() {
 
     return (
         <div className="App">
-            <div>
+            {/* <div>
                 <button onClick={createLinkToken}>
                     Click this button first (Create Link Token)
                 </button>
-            </div>
+            </div> */}
             <div className="Link">
                 <Link
                     createLinkToken={createLinkToken}
